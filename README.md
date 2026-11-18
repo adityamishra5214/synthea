@@ -87,7 +87,7 @@ Zero-cleaning 1:1 raw tables")]
 
 ```bash
 # 1. Clone repository & navigate to directory
-git clone https://github.com/adityamishra/patient-data-pipeline.git
+git clone https://github.com/adityamishra/synthea.git
 cd snythea
 
 # 2. Install dependencies
