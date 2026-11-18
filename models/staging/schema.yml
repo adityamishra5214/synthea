@@ -1,0 +1,104 @@
+version: 2
+
+models:
+  - name: stg_patients
+    description: "Staging model for patients with standardized snake_case and parsed dates."
+    columns:
+      - name: patient_id
+        description: "Primary key for patient."
+        tests:
+          - unique
+          - not_null
+      - name: gender
+        description: "Patient biological sex."
+        tests:
+          - accepted_values:
+              values: ['M', 'F']
+              quote: true
+
+  - name: stg_encounters
+    description: "Staging model for clinical encounters with timestamps and class categorizations."
+    columns:
+      - name: encounter_id
+        description: "Primary key for encounter."
+        tests:
+          - unique
+          - not_null
+      - name: patient_id
+        description: "Foreign key referencing stg_patients."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_patients')
+              field: patient_id
+      - name: encounter_class
+        description: "Encounter setting classification."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['ambulatory', 'emergency', 'inpatient', 'wellness', 'outpatient', 'urgentcare', 'snf', 'home']
+              quote: true
+
+  - name: stg_conditions
+    description: "Staging model for patient diagnoses and onset/stop dates."
+    columns:
+      - name: condition_id
+        description: "Surrogate primary key for condition occurrence."
+        tests:
+          - unique
+          - not_null
+      - name: patient_id
+        description: "Foreign key referencing stg_patients."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_patients')
+              field: patient_id
+
+  - name: stg_medications
+    description: "Staging model for prescribed medications."
+    columns:
+      - name: medication_id
+        description: "Surrogate primary key for medication event."
+        tests:
+          - unique
+          - not_null
+      - name: patient_id
+        description: "Foreign key referencing stg_patients."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_patients')
+              field: patient_id
+
+  - name: stg_observations
+    description: "Staging model for clinical observations and vital signs."
+    columns:
+      - name: observation_id
+        description: "Surrogate primary key for observation measurement."
+        tests:
+          - unique
+          - not_null
+      - name: patient_id
+        description: "Foreign key referencing stg_patients."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_patients')
+              field: patient_id
+
+  - name: stg_procedures
+    description: "Staging model for diagnostic and surgical procedures."
+    columns:
+      - name: procedure_id
+        description: "Surrogate primary key for procedure event."
+        tests:
+          - unique
+          - not_null
+      - name: patient_id
+        description: "Foreign key referencing stg_patients."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_patients')
+              field: patient_id

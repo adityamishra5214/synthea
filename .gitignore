@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+
+# dbt
+target/
+dbt_packages/
+logs/
+
+# Database & local data
+*.duckdb
+*.duckdb.wal
+data/raw/*.csv
+!data/raw/.gitkeep

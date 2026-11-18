@@ -1,0 +1,48 @@
+version: 2
+
+sources:
+  - name: raw
+    database: warehouse
+    schema: raw
+    description: "Raw synthetic EHR relational tables ingested directly from Synthea CSV files."
+    tables:
+      - name: patients
+        description: "Patient demographics and baseline records."
+        columns:
+          - name: Id
+            description: "Primary key UUID for patient."
+      - name: encounters
+        description: "Clinical encounters across inpatient, ambulatory, emergency, wellness classes."
+        columns:
+          - name: Id
+            description: "Primary key UUID for encounter."
+          - name: PATIENT
+            description: "Foreign key referencing patients.Id."
+      - name: conditions
+        description: "Diagnoses recorded for patients with onset/resolution dates."
+        columns:
+          - name: PATIENT
+            description: "Foreign key referencing patients.Id."
+          - name: ENCOUNTER
+            description: "Foreign key referencing encounters.Id."
+      - name: medications
+        description: "Prescribed and dispensed medication records."
+        columns:
+          - name: PATIENT
+            description: "Foreign key referencing patients.Id."
+          - name: ENCOUNTER
+            description: "Foreign key referencing encounters.Id."
+      - name: observations
+        description: "Clinical vitals, lab measurements, and physiological indicators."
+        columns:
+          - name: PATIENT
+            description: "Foreign key referencing patients.Id."
+          - name: ENCOUNTER
+            description: "Foreign key referencing encounters.Id."
+      - name: procedures
+        description: "Surgical and diagnostic procedures performed."
+        columns:
+          - name: PATIENT
+            description: "Foreign key referencing patients.Id."
+          - name: ENCOUNTER
+            description: "Foreign key referencing encounters.Id."

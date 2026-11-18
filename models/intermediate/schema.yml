@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: dim_patients
+    description: "Dimensional table for patients enriched with age bands and chronic condition flags."
+    columns:
+      - name: patient_id
+        description: "Primary key for patient."
+        tests:
+          - unique
+          - not_null
+      - name: age_band
+        description: "Standard clinical age stratification band."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['0-17 Pediatric', '18-49 Adult', '50-64 Middle-Aged', '65+ Senior']
+              quote: true
+
+  - name: fct_encounters
+    description: "Fact table for encounters with primary diagnosis and duration metrics."
+    columns:
+      - name: encounter_id
+        description: "Primary key for encounter."
+        tests:
+          - unique
+          - not_null
+      - name: patient_id
+        description: "Foreign key referencing dim_patients."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_patients')
+              field: patient_id
+
+  - name: int_patient_conditions
+    description: "Distinct patient condition occurrences with demographic cohort attribution."
+    columns:
+      - name: patient_id
+        tests:
+          - not_null
+      - name: condition_description
+        tests:
+          - not_null

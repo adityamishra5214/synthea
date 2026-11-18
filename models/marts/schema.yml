@@ -1,0 +1,100 @@
+version: 2
+
+models:
+  - name: mart_readmission_30d
+    description: "Clinical mart tracking 30-day inpatient readmissions and underlying primary conditions."
+    columns:
+      - name: index_encounter_id
+        description: "Primary key for index inpatient admission."
+        tests:
+          - unique
+          - not_null
+      - name: patient_id
+        description: "Foreign key referencing dim_patients."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_patients')
+              field: patient_id
+      - name: readmit_flag
+        description: "Binary flag indicating whether readmission occurred within 30 days of discharge."
+        tests:
+          - not_null
+          - accepted_values:
+              values: [0, 1]
+    tests:
+      - dbt_utils.expression_is_true:
+          name: discharge_after_or_equal_admission
+          expression: "index_discharge_date >= index_admission_date"
+      - dbt_utils.expression_is_true:
+          name: readmission_window_sanity
+          expression: "readmit_flag = 0 OR (days_to_readmit >= 0 AND days_to_readmit <= 30)"
+
+  - name: mart_comorbidity_pairs
+    description: "Clinical mart analyzing pairwise condition co-occurrences across demographic cohorts."
+    columns:
+      - name: pair_id
+        description: "Surrogate primary key for cohort and condition pair."
+        tests:
+          - unique
+          - not_null
+      - name: cohort
+        description: "Demographic cohort name."
+        tests:
+          - not_null
+      - name: condition_a
+        description: "First condition in alphabetical pair."
+        tests:
+          - not_null
+      - name: condition_b
+        description: "Second condition in alphabetical pair."
+        tests:
+          - not_null
+      - name: patient_count
+        description: "Count of distinct patients exhibiting both conditions."
+        tests:
+          - not_null
+    tests:
+      - dbt_utils.expression_is_true:
+          name: condition_order_guard
+          expression: "condition_a < condition_b"
+
+  - name: mart_chronic_adherence
+    description: "Clinical mart calculating longitudinal medication therapy adherence proxy for chronic cohorts."
+    columns:
+      - name: adherence_id
+        description: "Surrogate primary key for patient chronic condition episode."
+        tests:
+          - unique
+          - not_null
+      - name: patient_id
+        description: "Foreign key referencing dim_patients."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_patients')
+              field: patient_id
+      - name: condition
+        description: "Chronic condition category."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Diabetes', 'Hypertension']
+              quote: true
+      - name: active_med_flag
+        description: "Binary flag indicating active prescription at close of observation."
+        tests:
+          - not_null
+          - accepted_values:
+              values: [0, 1]
+      - name: gap_days
+        description: "Number of unmedicated days post-diagnosis."
+        tests:
+          - not_null
+    tests:
+      - dbt_utils.expression_is_true:
+          name: adherence_proxy_bounds
+          expression: "adherence_proxy >= 0.0 AND adherence_proxy <= 1.0"
+      - dbt_utils.expression_is_true:
+          name: gap_days_non_negative
+          expression: "gap_days >= 0"
